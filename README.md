@@ -75,6 +75,13 @@ flowchart TD
 
 ## 4. Główne Moduły i Funkcjonalności
 
+- **System Uwierzytelniania Administratora (Role-Based View)**:
+  - **Tryb Gościa / Wykładowcy (Public Read-Only)**: domyślny tryb dla osób odwiedzających portfolio. Zapewnia przejrzysty, bezpieczny wgląd we wszystkie materiały, kod i notatki, ukrywając przyciski modyfikacji.
+  - **Tryb Administratora (Full Control)**: odblokowuje przyciski tworzenia (`+ Dodaj nową lekcję`), kafelkowy stub w siatce oraz akcje na kartach (edycja `✏️`, oznaczanie opanowania `⚡`, usuwanie `🗑`).
+  - **Dane dostępowe**:
+    - Login: `rbudnik`
+    - Hasło: `zniwna112bc`
+  - Trwałość sesji oparta o bezpieczną pamięć podręczną przeglądarki (`localStorage`).
 - **Kompletny Cykl CRUD w Czasie Rzeczywistym**:
   - Tworzenie nowych notatek z przypisaniem przedmiotu, daty, treści i tagów.
   - Wbudowany tryb edycji: dwukierunkowe wiązanie formularza przywraca surowy stan z ukrytego elementu `<template class="raw-data">`.

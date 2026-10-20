@@ -3,6 +3,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// DANE LOGOWANIA ADMINISTRATORA
+const ADMIN_USER = 'rbudnik';
+const ADMIN_PASS = 'zniwna112bc';
+const AUTH_STORAGE_KEY = 'zzcms_admin_session';
+
 const elements = {
   addBtn: document.getElementById('addLessonBtn'),
   addStub: document.getElementById('addCardStub'),
@@ -12,10 +17,103 @@ const elements = {
   grid: document.getElementById('lessonsGrid'),
   modalTitle: document.getElementById('modalTitle'),
   editIdInput: document.getElementById('editCardId'),
-  submitBtn: document.getElementById('submitBtn')
+  submitBtn: document.getElementById('submitBtn'),
+  
+  // Elementy autoryzacji
+  openLoginBtn: document.getElementById('openLoginBtn'),
+  logoutBtn: document.getElementById('logoutBtn'),
+  adminControls: document.getElementById('adminControls'),
+  authStatusTag: document.getElementById('authStatusTag'),
+  loginModal: document.getElementById('loginModal'),
+  loginForm: document.getElementById('loginForm'),
+  loginUsername: document.getElementById('loginUsername'),
+  loginPassword: document.getElementById('loginPassword'),
+  loginErrorMsg: document.getElementById('loginErrorMsg'),
+  closeLoginModal: document.getElementById('closeLoginModal'),
+  cancelLoginBtn: document.getElementById('cancelLoginBtn')
 };
 
+// Stan autoryzacji
+const isAdminAuthenticated = () => {
+  return localStorage.getItem(AUTH_STORAGE_KEY) === 'true';
+};
+
+const setAdminAuthenticated = (isAuthed) => {
+  if (isAuthed) {
+    localStorage.setItem(AUTH_STORAGE_KEY, 'true');
+  } else {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+  }
+  updateAuthUI();
+};
+
+const updateAuthUI = () => {
+  const isAuthed = isAdminAuthenticated();
+  if (isAuthed) {
+    document.body.classList.add('is-admin');
+    if (elements.openLoginBtn) elements.openLoginBtn.style.display = 'none';
+    if (elements.adminControls) elements.adminControls.style.display = 'flex';
+    if (elements.authStatusTag) {
+      elements.authStatusTag.textContent = 'Admin: rbudnik';
+      elements.authStatusTag.classList.add('active');
+    }
+  } else {
+    document.body.classList.remove('is-admin');
+    if (elements.openLoginBtn) elements.openLoginBtn.style.display = 'inline-flex';
+    if (elements.adminControls) elements.adminControls.style.display = 'none';
+    if (elements.authStatusTag) {
+      elements.authStatusTag.textContent = 'Tryb podglądu (Gość)';
+      elements.authStatusTag.classList.remove('active');
+    }
+  }
+};
+
+// Modal logowania
+const openLoginModal = () => {
+  if (elements.loginErrorMsg) elements.loginErrorMsg.style.display = 'none';
+  if (elements.loginForm) elements.loginForm.reset();
+  elements.loginModal?.showModal();
+};
+
+const closeLoginModal = () => {
+  elements.loginModal?.close();
+  if (elements.loginErrorMsg) elements.loginErrorMsg.style.display = 'none';
+};
+
+elements.openLoginBtn?.addEventListener('click', openLoginModal);
+elements.closeLoginModal?.addEventListener('click', closeLoginModal);
+elements.cancelLoginBtn?.addEventListener('click', closeLoginModal);
+elements.loginModal?.addEventListener('click', (e) => {
+  if (e.target === elements.loginModal) closeLoginModal();
+});
+
+elements.loginForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const username = elements.loginUsername?.value.trim();
+  const password = elements.loginPassword?.value;
+
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    setAdminAuthenticated(true);
+    closeLoginModal();
+  } else {
+    if (elements.loginErrorMsg) {
+      elements.loginErrorMsg.textContent = 'Nieprawidłowy login lub hasło.';
+      elements.loginErrorMsg.style.display = 'block';
+    }
+  }
+});
+
+elements.logoutBtn?.addEventListener('click', () => {
+  setAdminAuthenticated(false);
+});
+
+// Modal lekcji
 const openModal = (editMode = false) => {
+  if (!isAdminAuthenticated()) {
+    openLoginModal();
+    return;
+  }
+
   elements.modalTitle.textContent = editMode ? 'Edytuj materiały' : 'Dodaj materiały z zajęć';
   elements.submitBtn.textContent = editMode ? 'Zapisz zmiany' : 'Zapisz';
   if (!editMode) {
@@ -30,7 +128,6 @@ const closeModal = () => {
   elements.form.reset();
 };
 
-// Listenery otwierania/zamykania
 elements.addBtn?.addEventListener('click', () => openModal(false));
 elements.addStub?.addEventListener('click', () => openModal(false));
 elements.closeBtns.forEach(btn => btn?.addEventListener('click', closeModal));
@@ -85,11 +182,9 @@ const loadLessons = async () => {
     return;
   }
 
-  // Wyczyść istniejące kafelki (oprócz addCardStub)
   const existingTiles = elements.grid.querySelectorAll('.glass-card-tile:not(#addCardStub)');
   existingTiles.forEach(tile => tile.remove());
 
-  // Renderuj pobrane z bazy
   data.forEach(item => {
     const card = createCardElement(item);
     elements.grid.insertBefore(card, elements.addStub);
@@ -99,6 +194,12 @@ const loadLessons = async () => {
 // Zapis / Edycja kafelka w bazie Supabase
 elements.form?.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  if (!isAdminAuthenticated()) {
+    closeModal();
+    openLoginModal();
+    return;
+  }
   
   const formData = new FormData(elements.form);
   const data = Object.fromEntries(formData);
@@ -144,7 +245,7 @@ elements.form?.addEventListener('submit', async (e) => {
 
     if (error) {
       console.error('Błąd zapisu do Supabase:', error);
-      loadLessons(); // fallback: przywróć stan z bazy
+      loadLessons();
     }
   }
 });
@@ -157,6 +258,12 @@ elements.grid?.addEventListener('click', async (e) => {
   const card = btn.closest('.glass-card-tile');
   if (!card || card.id === 'addCardStub') return;
   const cardId = card.id;
+
+  // Weryfikacja uprawnień administratora
+  if (!isAdminAuthenticated()) {
+    openLoginModal();
+    return;
+  }
   
   if (btn.classList.contains('btn-delete')) {
     card.remove();
@@ -193,8 +300,9 @@ elements.grid?.addEventListener('click', async (e) => {
   }
 });
 
-// Inicjalizacja: załaduj dane z Supabase i nasłuchuj zmian Realtime
+// Inicjalizacja: ustawienie UI autoryzacji, załadowanie danych z Supabase i nasłuchiwanie Realtime
 window.addEventListener('DOMContentLoaded', () => {
+  updateAuthUI();
   loadLessons();
 
   if (supabaseClient) {
