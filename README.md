@@ -1,4 +1,5 @@
-<div align="center">
+<img width="1874" height="1010" alt="Zrzut ekranu 2026-10-23 o 01 32 25" src="https://github.com/user-attachments/assets/b7495db5-7309-416e-b7b9-7654c3406847" />
+
 
 # zzcms
 
@@ -13,12 +14,12 @@ Napisana w 100% w czystym JavaScriptcie, bez ciężkich frameworków, w ciemnym 
 ---
 
 ## <img src="https://api.iconify.design/lucide:camera.svg?color=%23a3a3a3" width="24" align="absmiddle"> Zrzuty ekranu
-
-![Główny widok aplikacji](TUTAJ_WKLEJ_LINK_DO_ZDJECIA_GLOWNEGO)
+<img width="1874" height="1010" alt="Zrzut ekranu 2026-10-23 o 01 32 25" src="https://github.com/user-attachments/assets/b7495db5-7309-416e-b7b9-7654c3406847" />
+<img width="1873" height="1022" alt="Zrzut ekranu 2026-10-23 o 01 29 56" src="https://github.com/user-attachments/assets/186e733d-347f-4d21-a91d-6cc5a6cbba45" />
+<div align="center">
 *Główny widok kafelków z notatkami.*
 
-![Widok edycji lub kodu](TUTAJ_WKLEJ_LINK_DO_INNEGO_ZDJECIA)
-*Przykładowy zrzut z dedykowanego pola na kod i komendy.*
+
 
 ---
 
