@@ -1,7 +1,5 @@
-<img width="1874" height="1010" alt="Zrzut ekranu 2026-10-23 o 01 32 25" src="https://github.com/user-attachments/assets/b7495db5-7309-416e-b7b9-7654c3406847" />
 
-
-# zzcms
+### zzcms
 
 **Moja prosta apka (Single Page Application) do trzymania notatek z wykładów, labów i skrawków kodu.**<br>
 Napisana w 100% w czystym JavaScriptcie, bez ciężkich frameworków, w ciemnym klimacie "glassmorphism".
